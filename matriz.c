@@ -10,6 +10,8 @@ void imprimirMatriz(int **matriz);
 void liberarMemoria(int **matriz);
 void multiplicar(int **a, int **b, int **res);
 
+
+
 /*********************************************************************************/
 //Main de Parte 1. Descomentar para probar.
 
