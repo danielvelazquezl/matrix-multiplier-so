@@ -1,79 +1,81 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h> 
+#include <time.h>
 
-//int orden; //tamanho de la matriz
+int **reserveMemory(int size);
+void cargarmatrix(int **matrix, int size, char const *path);
+void freeMemory(int **matrix, int size);
 
-int** reservarMemoria(int orden);
-void cargarMatriz(int **matriz, int orden, char const *nombre);
-void liberarMemoria(int **matriz, int orden);
+int main(int argc, char const *argv[])
+{
+	int **matrix;
+	int size = atoi(argv[1]);
+	//srand(time(NULL));
 
-/*********************************************************************************/
-//Main de Parte 1. Descomentar para probar.
+	matrix = reserveMemory(size);
+	cargarmatrix(matrix, size, argv[2]);
+	freeMemory(matrix, size);
 
-int main(int argc, char const *argv[]){
-	int **matriz;
-	int orden = atoi(argv[1]);
-	srand(time(NULL));
-	
-	matriz = reservarMemoria(orden);
-	cargarMatriz(matriz, orden, argv[2]);
-	liberarMemoria(matriz, orden);
-
-	//imprimirMatriz(matriz);
 	return 0;
 }
 
-
-int** reservarMemoria(int orden){
+int **reserveMemory(int size)
+{
 	int i;
-	int **matriz = (int**) malloc(orden*sizeof(int*));
-	for(i=0; i<orden; i++){
-		matriz[i] = (int*) malloc(orden*sizeof(int));
+	int **matrix = (int **)malloc(size * sizeof(int *));
+	for (i = 0; i < size; i++)
+	{
+		matrix[i] = (int *)malloc(size * sizeof(int));
 	}
-	return matriz;
+	return matrix;
 }
 
-void cargarMatriz(int **matriz, int orden, char const *nombre){
+void cargarmatrix(int **matrix, int size, char const *path)
+{
 	int i, j;
 	FILE *outfile;
-	outfile = fopen(nombre, "w");
-	if (outfile == NULL) 
-    { 
-        fprintf(stderr, "\nError opend file\n"); 
-        exit (1); 
-    } 
-	for (i=0; i<orden; i++){
-		for (j=0;j<orden;j++){
-			matriz[i][j]= rand()%6; //Numero aleatorio 0<=n<=5
-			
-		}
-		fwrite(matriz[i], sizeof(int), orden, outfile);	
+	outfile = fopen(path, "w");
+	if (outfile == NULL)
+	{
+		fprintf(stderr, "\nError opend file\n");
+		exit(1);
 	}
-	
-	if(fwrite != 0)  
-        printf("contents to file written successfully !\n"); 
-    else 
-        printf("error writing file !\n");
+	for (i = 0; i < size; i++)
+	{
+		for (j = 0; j < size; j++)
+		{
+			matrix[i][j] = rand() % 10; //random number from 0 to 9
+		}
+		fwrite(matrix[i], sizeof(int), size, outfile);
+	}
+
+	if (fwrite != 0)
+		printf("contents to file written successfully !\n");
+	else
+		printf("error writing file !\n");
 	fclose(outfile);
 }
 
-
-void imprimirMatriz(int **matriz, int orden){
+void printMatrix(int **matrix, int size)
+{
 	int i, j;
-	for (i=0; i<orden; i++){
-		for (j=0;j<orden;j++){
-			printf("%d ",matriz[i][j]);
+	for (i = 0; i < size; i++)
+	{
+		for (j = 0; j < size; j++)
+		{
+			printf("%d ", matrix[i][j]);
 		}
 		printf("\n");
 	}
 	printf("\n");
 }
 
-void liberarMemoria(int **matriz,int orden){
+void freeMemory(int **matrix, int size)
+{
 	int i;
-	for(i=0; i<orden; i++){
-		free(matriz[i]);
+	for (i = 0; i < size; i++)
+	{
+		free(matrix[i]);
 	}
-	free(matriz);
+	free(matrix);
 }
