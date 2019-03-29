@@ -19,6 +19,7 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 
+//reserve
 int **reserveMemory(int size)
 {
 	int i;
