@@ -3,7 +3,7 @@
 #include <time.h>
 
 int **reserveMemory(int size);
-void fillMatriz(int **matrix, int size, char const *path);
+void fillMatrix(int **matrix, int size, char const *path);
 void freeMemory(int **matrix, int size);
 
 int main(int argc, char const *argv[])
@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
 	srand(time(NULL));
 
 	matrix = reserveMemory(size);
-	fillMatriz(matrix, size, argv[2]);
+	fillMatrix(matrix, size, argv[2]);
 	freeMemory(matrix, size);
 
 	return 0;
@@ -30,7 +30,7 @@ int **reserveMemory(int size)
 	return matrix;
 }
 
-void fillMatriz(int **matrix, int size, char const *path)
+void fillMatrix(int **matrix, int size, char const *path)
 {
 	int i, j;
 	FILE *outfile;
@@ -45,9 +45,9 @@ void fillMatriz(int **matrix, int size, char const *path)
 		for (j = 0; j < size; j++)
 		{
 			matrix[i][j] = rand() % 10; //random number from 0 to 9
-			printf("%d ", matrix[i][j]);
+			//printf("%d ", matrix[i][j]);
 		}
-		printf("\n");
+		//printf("\n");
 		fwrite(matrix[i], sizeof(int), size, outfile);
 	}
 

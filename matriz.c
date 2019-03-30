@@ -1,107 +1,103 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h> 
+#include <math.h>
 
-int orden; //tamanho de la matriz
-
-int** reservarMemoria();
-void cargarMatriz(int **matriz, char* nombre);
-void leerMatriz(int **matriz, char* nombre);
-void imprimirMatriz(int **matriz);
-void liberarMemoria(int **matriz);
-void multiplicar(int **a, int **b, int **res);
-
+int **reserveMemory(int size);
+void fillMatrix(int **matrix, int size, char const *path);
+void freeMemory(int **matrix, int size);
+void readMatrix(int **matrix, int size, char const *path);
+int matrixOrder(char const *path);
+void multiply(int **a, int **b, int **res, int size);
 
 /*********************************************************************************/
 //Main de Parte 1. Descomentar para probar.
 
-int main(){
-	int **matrizA;
-	int **matrizB;
-	int **resultado;
-	
-	
-	srand(time(NULL));
-	printf("Ingrese el orden de la matriz: ");
-	scanf("%d",&orden);
-	
-	matrizA = reservarMemoria();
-	matrizB = reservarMemoria();
-	cargarMatriz(matrizA, "mat_A.txt");
-	cargarMatriz(matrizB, "mat_B.txt");
-	liberarMemoria(matrizA);
-	liberarMemoria(matrizB);
+int main(int argc, char const *argv[]){
+	int **matrixA;
+	int **matrixB;
+	int **result;
+	int order;
 
-	matrizA = reservarMemoria();
-	matrizB = reservarMemoria();
-	leerMatriz(matrizA, "mat_A.txt");
-	leerMatriz(matrizB, "mat_B.txt");
+	order = matrixOrder(argv[1]);
 
-	imprimirMatriz(matrizA);
-    imprimirMatriz(matrizB);
+	matrixA = reserveMemory(order);
+	matrixB = reserveMemory(order);
+	readMatrix(matrixA, order, argv[1]);
+	readMatrix(matrixB, order, argv[2]);
 
-    resultado = reservarMemoria();
-	multiplicar(matrizA, matrizB, resultado);
-	leerMatriz(resultado, "resultado.txt");
-	imprimirMatriz(resultado);
+	//imprimirMatriz(matrizA);
+    //imprimirMatriz(matrizB);
 
-	liberarMemoria(matrizA);
-	liberarMemoria(matrizB);
-	liberarMemoria(resultado);
+    result = reserveMemory(order);
+	multiply(matrixA, matrixB, result, order);
+	fillMatrix(result, order, "resultado.txt");
+	//leerMatriz(resultado, "resultado.txt");
+	//imprimirMatriz(resultado);
 
-	short i= 5;
-	short c= 95;
-	FILE *outfile;
-	outfile = fopen("mat_A.txt", "r");
-	//fwrite(&i, sizeof(short), 1, outfile);
-	//fwrite(&c, sizeof(short), 1, outfile);
-	fseek(outfile, 0L, SEEK_END);
-  	printf("test.c ocupa %d bytes", ftell(outfile)/4);
-	fclose(outfile);
+	freeMemory(matrixA, order);
+	freeMemory(matrixB, order);
+	freeMemory(result, order);
 
 	system("PAUSE");
 	return 0;
 }
 
 
-int** reservarMemoria(){
-	int i;
-	int **matriz = (int**) malloc(orden*sizeof(int*));
-	for(i=0; i<orden; i++){
-		matriz[i] = (int*) malloc(orden*sizeof(int));
-	}
-	return matriz;
+int matrixOrder(char const *path){
+	FILE *outfile;
+	outfile = fopen(path, "r");
+	fseek(outfile, 0L, SEEK_END);
+	int order = sqrt(ftell(outfile)/4);
+	//printf("test.c ocupa %d bytes", n);
+	fclose(outfile);
+	return order;
 }
 
-void cargarMatriz(int **matriz, char* nombre){
+int **reserveMemory(int size)
+{
+	int i;
+	int **matrix = (int **)malloc(size * sizeof(int *));
+	for (i = 0; i < size; i++)
+	{
+		matrix[i] = (int *)malloc(size * sizeof(int));
+	}
+	return matrix;
+}
+
+void fillMatrix(int **matrix, int size, char const *path)
+{
 	int i, j;
 	FILE *outfile;
-	outfile = fopen(nombre, "w");
-	if (outfile == NULL) 
-    { 
-        fprintf(stderr, "\nError opend file\n"); 
-        exit (1); 
-    } 
-	for (i=0; i<orden; i++){
-		for (j=0;j<orden;j++){
-			matriz[i][j]= rand()%6; //Numero aleatorio 0<=n<=5
-			
-			printf("%d ", matriz[i][j]);
-		}
-		fwrite(matriz[i], sizeof(int), orden, outfile);	
+	outfile = fopen(path, "w");
+	if (outfile == NULL)
+	{
+		fprintf(stderr, "\nError opend file\n");
+		exit(1);
 	}
-	
-	if(fwrite != 0)  
-        printf("contents to file written successfully !\n"); 
-    else 
-        printf("error writing file !\n");
+	for (i = 0; i < size; i++)
+	{
+		for (j = 0; j < size; j++)
+		{
+			matrix[i][j] = rand() % 10; //random number from 0 to 9
+			//printf("%d ", matrix[i][j]);
+		}
+		//printf("\n");
+		fwrite(matrix[i], sizeof(int), size, outfile);
+	}
+
+	if (fwrite != 0)
+		printf("contents to file written successfully !\n");
+	else
+		printf("error writing file !\n");
 	fclose(outfile);
 }
 
-void leerMatriz(int **matriz, char* nombre){
+
+void readMatrix(int **matrix, int size, char const *path){
 	FILE *infile; 
     // Open matriz_name.txt for reading 
-    infile = fopen (nombre, "r"); 
+    infile = fopen (path, "r"); 
     if (infile == NULL) 
     { 
         fprintf(stderr, "\nError opening file\n"); 
@@ -109,52 +105,44 @@ void leerMatriz(int **matriz, char* nombre){
     } 
       
     // read file contents till end of file
-    for(int i=0; i<orden; i++){
-    	fread(matriz[i], sizeof(int), orden, infile);
+    for(int i=0; i<size; i++){
+    	fread(matrix[i], sizeof(int), size, infile);
     }
     fclose (infile); 
 }
 
-void imprimirMatriz(int **matriz){
-	int i, j;
-	for (i=0; i<orden; i++){
-		for (j=0;j<orden;j++){
-			printf("%d ",matriz[i][j]);
-		}
-		printf("\n");
-	}
-	printf("\n");
-}
 
-void liberarMemoria(int **matriz){
+void freeMemory(int **matrix, int size)
+{
 	int i;
-	for(i=0; i<orden; i++){
-		free(matriz[i]);
+	for (i = 0; i < size; i++)
+	{
+		free(matrix[i]);
 	}
-	free(matriz);
+	free(matrix);
 }
 
-void multiplicar(int **a, int **b, int **res){
+void multiply(int **a, int **b, int **res, int size){
 	int i,j,k;
-	FILE *outfile;
+	/*FILE *outfile;
 	outfile = fopen("resultado.txt", "w");
 	if (outfile == NULL) 
     { 
         fprintf(stderr, "\nError opend file\n"); 
         exit (1); 
-    } 
-	for (i=0;i<orden;i++){
-		for (j=0;j<orden;j++){ 
+    } */
+	for (i=0;i<size;i++){
+		for (j=0;j<size;j++){ 
 			res[i][j]=0;
-			for (k=0;k<orden;k++){
+			for (k=0;k<size;k++){
 				res[i][j]=res[i][j]+a[i][k]*b[k][j];
 			}
 		}
-		fwrite(res[i], sizeof(int), orden, outfile);	
+		//fwrite(res[i], sizeof(int), size, outfile);	
     }
-    if(fwrite != 0)  
+    /*if(fwrite != 0) 
         printf("contents to file written successfully !\n"); 
     else 
         printf("error writing file !\n");
-	fclose(outfile);
+	fclose(outfile);*/
 }
