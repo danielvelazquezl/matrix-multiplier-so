@@ -31,7 +31,7 @@ int main(int argc, char const *argv[]){
 
     result = reserveMemory(order);
 	multiply(matrixA, matrixB, result, order);
-	fillMatrix(result, order, "resultado.txt");
+	//fillMatrix(result, order, "resultado.txt");
 	//leerMatriz(resultado, "resultado.txt");
 	//imprimirMatriz(resultado);
 
@@ -124,13 +124,13 @@ void freeMemory(int **matrix, int size)
 
 void multiply(int **a, int **b, int **res, int size){
 	int i,j,k;
-	/*FILE *outfile;
+	FILE *outfile;
 	outfile = fopen("resultado.txt", "w");
 	if (outfile == NULL) 
     { 
         fprintf(stderr, "\nError opend file\n"); 
         exit (1); 
-    } */
+    } 
 	for (i=0;i<size;i++){
 		for (j=0;j<size;j++){ 
 			res[i][j]=0;
@@ -140,9 +140,9 @@ void multiply(int **a, int **b, int **res, int size){
 		}
 		//fwrite(res[i], sizeof(int), size, outfile);	
     }
-    /*if(fwrite != 0) 
+    if(fwrite != 0) 
         printf("contents to file written successfully !\n"); 
     else 
         printf("error writing file !\n");
-	fclose(outfile);*/
+	fclose(outfile);
 }
