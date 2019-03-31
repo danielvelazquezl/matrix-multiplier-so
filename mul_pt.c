@@ -11,8 +11,7 @@ typedef struct _params
     int **result;
 } params;
 
-//void *matmul(long id, int order, int threads, int **mA, int **mB, int **result)
-void *matmul(params* p)
+void *matmul(params *p)
 {
 
     int i, j, k;
@@ -20,7 +19,6 @@ void *matmul(params* p)
     int start_index = p->id * rows_per_thr;
     int final_index = (p->id + 1) * rows_per_thr;
 
-    printf("%d ", (int)p->id);
     for (i = start_index; i < final_index; i++)
     {
         for (j = 0; j < p->order; j++)
@@ -30,10 +28,7 @@ void *matmul(params* p)
                 p->result[i][j] += p->mA[i][k] * p->mB[k][j];
             }
         }
-       // printf("\n");
-        
     }
-    
 }
 
 int main(int argc, char *argv[])
@@ -50,21 +45,21 @@ int main(int argc, char *argv[])
 
     readMatrix(mA, order, argv[1]);
     readMatrix(mB, order, argv[2]);
-   
-     params p1 = {0, order, threads, mA, mB, result};
+
+    params ps[threads];
+    params p = {0, order, threads, mA, mB, result};
+
     //Creación de threads
     for (rank = 0; rank < threads; rank++)
     {
-       //p1.id = rank;
-        pthread_create(&tid[rank], NULL, (void *)matmul, (void *)&p1);
-        //pthread_create(&tid[1], NULL, (void *)matmul, (void *)&p2);
+        p.id = rank;
+        ps[rank] = p;
+        pthread_create(&tid[rank], NULL, (void *)matmul, (void *)&ps[rank]);
     }
 
     //Unión de threads
     for (rank = 0; rank < threads; rank++)
         pthread_join(tid[rank], NULL);
-
-    
 
     printf("\n Matriz resultado: \n");
     for (i = 0; i < order; i++)
