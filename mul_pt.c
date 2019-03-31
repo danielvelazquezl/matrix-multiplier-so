@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <sys/time.h>
 #include "shared_functions.h"
 
 typedef struct _params
@@ -31,8 +32,16 @@ void *matmul(params *p)
     }
 }
 
+double timeval_diff(struct timeval *a, struct timeval *b)
+{
+  return
+    (double)(a->tv_sec + (double)a->tv_usec/1000000) -
+    (double)(b->tv_sec + (double)b->tv_usec/1000000);
+}
+
 int main(int argc, char *argv[])
 {
+    struct timeval start, end;
     int threads = atoi(argv[3]);
     int order = matrixOrder(argv[1]);
     int **mA = reserveMemory(order);
@@ -50,6 +59,7 @@ int main(int argc, char *argv[])
     params p = {0, order, threads, mA, mB, result};
 
     //Creación de threads
+    gettimeofday(&start, NULL);
     for (rank = 0; rank < threads; rank++)
     {
         p.id = rank;
@@ -60,16 +70,11 @@ int main(int argc, char *argv[])
     //Unión de threads
     for (rank = 0; rank < threads; rank++)
         pthread_join(tid[rank], NULL);
+    
+    gettimeofday(&end, NULL);
 
-    printf("\n Matriz resultado: \n");
-    for (i = 0; i < order; i++)
-    {
-        for (j = 0; j < order; j++)
-        {
-            printf("%d ", result[i][j]);
-        }
-        printf("\n");
-    }
+    double t = timeval_diff(&end, &start);
+    printf("tiempo: %.4g segundos\n", t);
 
     freeMemory(mA, order);
     freeMemory(mB, order);
