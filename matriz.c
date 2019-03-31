@@ -39,7 +39,6 @@ int main(int argc, char const *argv[]){
 	freeMemory(matrixB, order);
 	freeMemory(result, order);
 
-	system("PAUSE");
 	return 0;
 }
 
