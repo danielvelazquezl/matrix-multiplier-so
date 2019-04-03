@@ -39,6 +39,20 @@ double timeval_diff(struct timeval *a, struct timeval *b)
     (double)(b->tv_sec + (double)b->tv_usec/1000000);
 }
 
+void printMatrix(int **matrix, int size)
+{
+    int i, j;
+    for (i = 0; i < size; i++)
+    {
+        for (j = 0; j < size; j++)
+        {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
 int main(int argc, char *argv[])
 {
     struct timeval start, end;
@@ -75,6 +89,8 @@ int main(int argc, char *argv[])
 
     double t = timeval_diff(&end, &start);
     printf("tiempo: %.4g segundos\n", t);
+
+    printMatrix(result, order);
 
     freeMemory(mA, order);
     freeMemory(mB, order);

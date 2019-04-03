@@ -2,6 +2,8 @@
 #include <sys/time.h>
 #include "shared_functions.h"
 
+pthread_mutex_t mutexsum;
+
 typedef struct _params
 {
     long id;
@@ -13,7 +15,7 @@ typedef struct _params
 } params;
 
 int getPosition(int i, int j, int order){
-    return ((i*order)+j)*sizeof(int);
+    return ((i*order)+j)*4;
 }
 
 void *matmul(params *p)
@@ -30,12 +32,19 @@ void *matmul(params *p)
         {
             for (k = 0; k < p->order; k++)
             {
-                //fseek(p->mat_A, getPosition(i,k,p->order), SEEK_SET);
-                //fseek(p->mat_B, getPosition(k,j,p->order), SEEK_SET);
-                //fread(&numA, sizeof(int), 1, p->mat_A);
-                //fread(&numB, sizeof(int), 1, p->mat_B);
-                //p->result[i][j] +=  numA* numB;
-                p->result[i][j] +=  0;
+                pthread_mutex_lock (&mutexsum);
+    
+    
+                //printf("[%d %d] ", getPosition(i,k,p->order), getPosition(k,j,p->order));
+                fseek(p->mat_A, getPosition(i,k,p->order), SEEK_SET);
+                fseek(p->mat_B, getPosition(k,j,p->order), SEEK_SET);
+                fread(&numA, sizeof(int), 1, p->mat_A);
+                fread(&numB, sizeof(int), 1, p->mat_B);
+
+                p->result[i][j] +=  numA* numB;
+               // printf("[%d %d] ", getPosition(i,k,p->order), getPosition(k,j,p->order));
+                pthread_mutex_unlock (&mutexsum);
+                
             }
         }
     }
@@ -50,20 +59,35 @@ double timeval_diff(struct timeval *a, struct timeval *b)
     (double)(b->tv_sec + (double)b->tv_usec/1000000);
 }
 
+void printMatrix(int **matrix, int size)
+{
+    int i, j;
+    for (i = 0; i < size; i++)
+    {
+        for (j = 0; j < size; j++)
+        {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
 int main(int argc, char *argv[])
 {
     FILE *matriz_A, *matriz_B;
     struct timeval start, end;
     int threads = atoi(argv[3]);
     int order = matrixOrder(argv[1]);
-    //matriz_A = fopen(argv[2], "r");
-    //matriz_B = fopen(argv[3], "r");
+    matriz_A = fopen(argv[1], "r");
+    matriz_B = fopen(argv[2], "r");
     int **result = reserveMemory(order);
-    srand(time(NULL));
     pthread_t tid[threads];
     int i, j;
     long rank;
 
+    pthread_mutex_init(&mutexsum, NULL);
+    
     params ps[threads];
     params p = {0, order, threads, matriz_A, matriz_B, result};
 
@@ -84,11 +108,12 @@ int main(int argc, char *argv[])
 
     double t = timeval_diff(&end, &start);
     printf("tiempo: %.4g segundos\n", t);
-
+    //printMatrix(result, order);
     //fclose(matriz_A);
-    //fclose(matriz_B);
+    fclose(matriz_B);
     freeMemory(result, order);
 
+    pthread_mutex_destroy(&mutexsum);
     // Fin de proceso padre
     pthread_exit(NULL);
     /*int num;
