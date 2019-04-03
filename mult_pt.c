@@ -15,9 +15,10 @@ typedef struct _params
 
 void *multiply(params *p)
 {
-
     int i, j, k;
+    //Numero de filas para cada thread
     int rows_per_thr = p->order / p->threads;
+    //Posicion de inicio y fin
     int start_index = p->id * rows_per_thr;
     int final_index = (p->id + 1) * rows_per_thr;
 

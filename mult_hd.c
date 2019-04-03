@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "shared_functions.h"
 
-pthread_mutex_t mutexsum;
+pthread_mutex_t mutexmul;
 
 /*Parametros para la funcion multiplicar*/
 typedef struct _params
@@ -21,9 +21,10 @@ int getPosition(int i, int j, int order){
 
 void *multiply(params *p)
 {
-
     int i, j, k, numA, numB;
+    //Numero de filas para cada thread
     int rows_per_thr = p->order / p->threads;
+    //Posicion de inicio y fin
     int start_index = p->id * rows_per_thr;
     int final_index = (p->id + 1) * rows_per_thr;
 
@@ -33,18 +34,17 @@ void *multiply(params *p)
         {
             for (k = 0; k < p->order; k++)
             {
-                pthread_mutex_lock (&mutexsum);
-    
-    
-                //printf("[%d %d] ", getPosition(i,k,p->order), getPosition(k,j,p->order));
+                //Bloquear recurso
+                pthread_mutex_lock (&mutexmul);
+                //Ir a posicion de los archivos y leer
                 fseek(p->mat_A, getPosition(i,k,p->order), SEEK_SET);
                 fseek(p->mat_B, getPosition(k,j,p->order), SEEK_SET);
                 fread(&numA, sizeof(int), 1, p->mat_A);
                 fread(&numB, sizeof(int), 1, p->mat_B);
 
                 p->result[i][j] +=  numA* numB;
-               // printf("[%d %d] ", getPosition(i,k,p->order), getPosition(k,j,p->order));
-                pthread_mutex_unlock (&mutexsum);
+                //Desbloquear
+                pthread_mutex_unlock (&mutexmul);
                 
             }
         }
@@ -52,38 +52,25 @@ void *multiply(params *p)
 }
 
 
-
-
-
-void printMatrix(int **matrix, int size)
-{
-    int i, j;
-    for (i = 0; i < size; i++)
-    {
-        for (j = 0; j < size; j++)
-        {
-            printf("%d ", matrix[i][j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
 int main(int argc, char *argv[])
 {
     FILE *matriz_A, *matriz_B;
     struct timeval start, end;
+    //Numero de threads
     int threads = atoi(argv[3]);
     int order = matrixOrder(argv[1]);
+    //Abrir archivos
     matriz_A = fopen(argv[1], "r");
     matriz_B = fopen(argv[2], "r");
     int **result = reserveMemory(order);
+
     pthread_t tid[threads];
     int i, j;
     long rank;
 
-    pthread_mutex_init(&mutexsum, NULL);
-    
+    //Inicializar mutex
+    pthread_mutex_init(&mutexmul, NULL);
+    //Array de parametros
     params ps[threads];
     params p = {0, order, threads, matriz_A, matriz_B, result};
 
@@ -104,26 +91,16 @@ int main(int argc, char *argv[])
 
     double t = timeval_diff(&end, &start);
     printf("tiempo: %.4g segundos\n", t);
+
     //printMatrix(result, order);
-    //fclose(matriz_A);
+    writeMatrix(result, order, "resultado.txt");
+
+    fclose(matriz_A);
     fclose(matriz_B);
     freeMemory(result, order);
 
-    pthread_mutex_destroy(&mutexsum);
+    pthread_mutex_destroy(&mutexmul);
     // Fin de proceso padre
     pthread_exit(NULL);
-    /*int num;
-    int pos;
-    pos = ((4*3)+1)*4;
-    FILE *fp;
-
-   fp = fopen("matriz_C.txt","w+");
-   //fputs("This is tutorialspoint.com", fp);
-   fread(&num, sizeof(int), 1, fp);
-    printf("%d\n", num);
-    fseek( fp, pos, SEEK_SET );
-    fread(&num, sizeof(int), 1, fp);
-    printf("%d\n", num);
-   fclose(fp);*/
     return 0;
 }
