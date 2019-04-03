@@ -7,7 +7,10 @@ int main(int argc, char const *argv[]){
 	int **matrixB;
 	int **result;
 	int order;
+	struct timeval start, end;
 
+
+	//Obtener orden de una sola matriz, por que son de igual orden
 	order = matrixOrder(argv[1]);
 
 	matrixA = reserveMemory(order);
@@ -15,14 +18,22 @@ int main(int argc, char const *argv[]){
 	readMatrix(matrixA, order, argv[1]);
 	readMatrix(matrixB, order, argv[2]);
 
-	//imprimirMatriz(matrizA);
-    //imprimirMatriz(matrizB);
-
     result = reserveMemory(order);
+
+    gettimeofday(&start, NULL);
+    //Mutiplicar
 	multiply(matrixA, matrixB, result, order);
-	//fillMatrix(result, order, "resultado.txt");
-	//leerMatriz(resultado, "resultado.txt");
-	//imprimirMatriz(resultado);
+	//Obtener tiempo
+	gettimeofday(&end, NULL);
+	double t = timeval_diff(&end, &start);
+    printf("tiempo: %.4g segundos\n", t);
+
+    //Para depurar
+	//printMatrix(matrixA, order);
+	//printMatrix(matrixB, order);
+	//printMatrix(result, order);
+
+	writeMatrix(result, order, "resultado.txt");
 
 	freeMemory(matrixA, order);
 	freeMemory(matrixB, order);
@@ -33,13 +44,6 @@ int main(int argc, char const *argv[]){
 
 void multiply(int **a, int **b, int **res, int size){
 	int i,j,k;
-	FILE *outfile;
-	outfile = fopen("resultado.txt", "w");
-	if (outfile == NULL) 
-    { 
-        fprintf(stderr, "\nError opend file\n"); 
-        exit (1); 
-    } 
 	for (i=0;i<size;i++){
 		for (j=0;j<size;j++){ 
 			res[i][j]=0;
@@ -47,11 +51,5 @@ void multiply(int **a, int **b, int **res, int size){
 				res[i][j]=res[i][j]+a[i][k]*b[k][j];
 			}
 		}
-		//fwrite(res[i], sizeof(int), size, outfile);	
     }
-    if(fwrite != 0) 
-        printf("contents to file written successfully !\n"); 
-    else 
-        printf("error writing file !\n");
-	fclose(outfile);
 }

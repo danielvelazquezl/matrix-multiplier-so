@@ -1,18 +1,18 @@
 #include "shared_functions.h"
 
-int **reserveMemory(int size)
+int **reserveMemory(int order)
 {
 	int i;
-	int **matrix = (int **)malloc(size * sizeof(int *));
-	for (i = 0; i < size; i++)
+	int **matrix = (int **)malloc(order * sizeof(int *));
+	for (i = 0; i < order; i++)
 	{
-		matrix[i] = (int *)malloc(size * sizeof(int));
+		matrix[i] = (int *)malloc(order * sizeof(int));
 	}
 	return matrix;
 }
 
-void fillMatrix(int **matrix, int size, char const *path)
-{
+
+void writeMatrix(int **matrix, int order, char const *path){
 	int i, j;
 	FILE *outfile;
 	outfile = fopen(path, "w");
@@ -21,13 +21,9 @@ void fillMatrix(int **matrix, int size, char const *path)
 		fprintf(stderr, "\nError opend file\n");
 		exit(1);
 	}
-	for (i = 0; i < size; i++)
+	for (i = 0; i < order; i++)
 	{
-		for (j = 0; j < size; j++)
-		{
-			matrix[i][j] = rand() % 10;
-		}
-		fwrite(matrix[i], sizeof(int), size, outfile);
+		fwrite(matrix[i], sizeof(int), order, outfile);
 	}
 
 	if (fwrite != 0)
@@ -48,7 +44,7 @@ int matrixOrder(char const *path){
 }
 
 
-void readMatrix(int **matrix, int size, char const *path){
+void readMatrix(int **matrix, int order, char const *path){
 	FILE *infile; 
     // Open matriz_name.txt for reading 
     infile = fopen (path, "r"); 
@@ -59,18 +55,39 @@ void readMatrix(int **matrix, int size, char const *path){
     } 
       
     // read file contents till end of file
-    for(int i=0; i<size; i++){
-    	fread(matrix[i], sizeof(int), size, infile);
+    for(int i=0; i<order; i++){
+    	fread(matrix[i], sizeof(int), order, infile);
     }
     fclose (infile); 
 }
 
-void freeMemory(int **matrix, int size)
+void freeMemory(int **matrix, int order)
 {
 	int i;
-	for (i = 0; i < size; i++)
+	for (i = 0; i < order; i++)
 	{
 		free(matrix[i]);
 	}
 	free(matrix);
+}
+
+void printMatrix(int **matrix, int order)
+{
+	int i, j;
+	for (i = 0; i < order; i++)
+	{
+		for (j = 0; j < order; j++)
+		{
+			printf("%d ", matrix[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+}
+
+double timeval_diff(struct timeval *a, struct timeval *b)
+{
+  return
+    (double)(a->tv_sec + (double)a->tv_usec/1000000) -
+    (double)(b->tv_sec + (double)b->tv_usec/1000000);
 }

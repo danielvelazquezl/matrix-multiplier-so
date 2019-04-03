@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include "shared_functions.h"
 
+/*Parametros para la funcion multiplicar*/
 typedef struct _params
 {
     long id;
@@ -12,7 +13,7 @@ typedef struct _params
     int **result;
 } params;
 
-void *matmul(params *p)
+void *multiply(params *p)
 {
 
     int i, j, k;
@@ -32,36 +33,19 @@ void *matmul(params *p)
     }
 }
 
-double timeval_diff(struct timeval *a, struct timeval *b)
-{
-  return
-    (double)(a->tv_sec + (double)a->tv_usec/1000000) -
-    (double)(b->tv_sec + (double)b->tv_usec/1000000);
-}
-
-void printMatrix(int **matrix, int size)
-{
-    int i, j;
-    for (i = 0; i < size; i++)
-    {
-        for (j = 0; j < size; j++)
-        {
-            printf("%d ", matrix[i][j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
 
 int main(int argc, char *argv[])
 {
     struct timeval start, end;
+    //Cantidad de hilos
     int threads = atoi(argv[3]);
+
     int order = matrixOrder(argv[1]);
+
     int **mA = reserveMemory(order);
     int **mB = reserveMemory(order);
     int **result = reserveMemory(order);
-    srand(time(NULL));
+
     pthread_t tid[threads];
     int i, j;
     long rank;
@@ -69,7 +53,9 @@ int main(int argc, char *argv[])
     readMatrix(mA, order, argv[1]);
     readMatrix(mB, order, argv[2]);
 
+    //Array de parametros
     params ps[threads];
+    //Parametro inicial
     params p = {0, order, threads, mA, mB, result};
 
     //Creación de threads
@@ -78,7 +64,7 @@ int main(int argc, char *argv[])
     {
         p.id = rank;
         ps[rank] = p;
-        pthread_create(&tid[rank], NULL, (void *)matmul, (void *)&ps[rank]);
+        pthread_create(&tid[rank], NULL, (void *)multiply, (void *)&ps[rank]);
     }
 
     //Unión de threads
@@ -90,7 +76,8 @@ int main(int argc, char *argv[])
     double t = timeval_diff(&end, &start);
     printf("tiempo: %.4g segundos\n", t);
 
-    printMatrix(result, order);
+    //printMatrix(result, order);
+    writeMatrix(result, order, "resultado.txt");
 
     freeMemory(mA, order);
     freeMemory(mB, order);

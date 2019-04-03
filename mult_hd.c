@@ -1,9 +1,9 @@
 #include <stdlib.h>
-#include <sys/time.h>
 #include "shared_functions.h"
 
 pthread_mutex_t mutexsum;
 
+/*Parametros para la funcion multiplicar*/
 typedef struct _params
 {
     long id;
@@ -14,11 +14,12 @@ typedef struct _params
     int **result;
 } params;
 
+
 int getPosition(int i, int j, int order){
     return ((i*order)+j)*4;
 }
 
-void *matmul(params *p)
+void *multiply(params *p)
 {
 
     int i, j, k, numA, numB;
@@ -52,12 +53,7 @@ void *matmul(params *p)
 
 
 
-double timeval_diff(struct timeval *a, struct timeval *b)
-{
-  return
-    (double)(a->tv_sec + (double)a->tv_usec/1000000) -
-    (double)(b->tv_sec + (double)b->tv_usec/1000000);
-}
+
 
 void printMatrix(int **matrix, int size)
 {
@@ -97,7 +93,7 @@ int main(int argc, char *argv[])
     {
         p.id = rank;
         ps[rank] = p;
-        pthread_create(&tid[rank], NULL, (void *)matmul, (void *)&ps[rank]);
+        pthread_create(&tid[rank], NULL, (void *)multiply, (void *)&ps[rank]);
     }
 
     //Unión de threads
